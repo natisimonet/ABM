@@ -62,9 +62,10 @@ public class AppABM {
 			Connection conexion = AdminBD.obtenerConexion();
 			st = conexion.createStatement();
 			ResultSet rs = st.executeQuery("select * from Persona");
+			System.out.println("ID | NOMBRE |EDAD | FECHA_NACIMIENTO");
 			while (rs.next()) {
 				System.out.println(rs.getInt(1) + "  " + rs.getString(2) + "  " + rs.getInt(3) + "  " + rs.getDate(4));
-				System.out.println("");
+				
 			}
 			conexion.close();
 
@@ -99,12 +100,8 @@ public class AppABM {
 			Scanner scan = new Scanner(System.in);
 			Connection conexion = AdminBD.obtenerConexion();
 			Statement st = conexion.createStatement();
-			ResultSet rs = st.executeQuery("select * from Persona");
-			while (rs.next()) {
-				System.out.println(rs.getInt(1) + "  " + rs.getString(2) + "  " + rs.getInt(3) + "  " + rs.getDate(4));
-				System.out.println("");
-			}
-			System.out.println("Si desea modificar 1. nombre, 2. Fecha_Nacimiento 3. ambas");
+			listado();
+			System.out.println("Elija columnas a modificar 1. Nombre, 2. Fecha_Nacimiento 3. Ambas");
 			int respuesta = scan.nextInt();
 		
 			switch (respuesta) {
@@ -131,10 +128,10 @@ public class AppABM {
 				} catch (ParseException e1) {
 
 					e1.printStackTrace();
-					st.executeUpdate(
-	    					"Update Persona SET Edad = " +edad+", FECHA_NACIMIENTO = '" +fechadenac+ "' where ID = " + ID + "");
-	    			conexion.close();
-				}
+					}
+				st.executeUpdate(
+    					"Update Persona SET Edad = " +edad+", FECHA_NACIMIENTO = '" +fechadenac+ "' where ID = " + ID + "");
+    			conexion.close();
 				break;
 			case 3:
 			System.out.println("Ingrese ID a modificar");
@@ -152,12 +149,10 @@ public class AppABM {
 			} catch (ParseException e1) {
 
 				e1.printStackTrace();
-				st.executeUpdate(
-    					"Update Persona SET NOMBRE = '" + nombrecambiado2 + "', Edad = " +edad+", FECHA_NACIMIENTO = '" +fechadenac+ "' where ID = " + ID + "");
-    			conexion.close();
-            	
-            	
-            }
+				}
+			st.executeUpdate(
+					"Update Persona SET NOMBRE = '" + nombrecambiado2 + "', Edad = " +edad+", FECHA_NACIMIENTO = '" +fechadenac+ "' where ID = " + ID + "");
+			conexion.close();
 			break;
 			default:
 				break;

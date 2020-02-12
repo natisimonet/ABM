@@ -35,6 +35,8 @@ public class AppABM {
 			case 4:
 				listado();
 				break;
+			case 5:
+				buscar();
 			case 0:
 
 				break;
@@ -50,7 +52,7 @@ public class AppABM {
 
 	private static int mostrarMenu() {
 		Scanner sc = new Scanner(System.in);
-		System.out.println("MENU OPCIONES: 1 -Alta | 2-Modificación | 3- Baja  | 4- Listado | 0-Salir ");
+		System.out.println("MENU OPCIONES: 1 -Alta | 2-Modificación | 3- Baja  | 4- Listado |5 - Buscar | 0-Salir ");
 		int opcion = sc.nextInt();
 		return opcion;
 	}
@@ -65,37 +67,44 @@ public class AppABM {
 			System.out.println("ID | NOMBRE |EDAD | FECHA_NACIMIENTO");
 			while (rs.next()) {
 				System.out.println(rs.getInt(1) + "  " + rs.getString(2) + "  " + rs.getInt(3) + "  " + rs.getDate(4));
-				
+
 			}
 			conexion.close();
 
 		} catch (SQLException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			mensajeError();
 		}
 
 	}
 
 	private static void baja() {
 		try {
+
 			Scanner scan = new Scanner(System.in);
 			Connection conexion = AdminBD.obtenerConexion();
 			Statement st = conexion.createStatement();
-			ResultSet rs = st.executeQuery("select * from Persona");
 			System.out.println("Ingrese ID a borrar");
-			int ID2 = scan.nextInt();
-			st.executeUpdate("DELETE From Persona Where " + ID2 + "");
-			conexion.close();
+			int ID = scan.nextInt();
+			ResultSet rs = st.executeQuery("select * from Persona WHERE ID= " + ID + ";");
+			if (rs.next()) {
+				st.executeUpdate("DELETE FROM Persona WHERE ID = " + ID + ";");
+				System.out.println("Baja del " + ID + " ejecutada correctamente");
+				conexion.close();
+
+			} else {
+				System.out.println("El ID no Existe");
+			}
 		} catch (SQLException |
 
 				ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			mensajeError();
 		}
 
 	}
 
-	private static void modificacion() { 
+	private static void modificacion() {
 		try {
 			Scanner scan = new Scanner(System.in);
 			Connection conexion = AdminBD.obtenerConexion();
@@ -103,67 +112,69 @@ public class AppABM {
 			listado();
 			System.out.println("Elija columnas a modificar 1. Nombre, 2. Fecha_Nacimiento 3. Ambas");
 			int respuesta = scan.nextInt();
-		
-			switch (respuesta) {
-			case 1: 
-				System.out.println("Ingrese ID a modificar");
-				int ID = scan.nextInt();
-				System.out.println("Ingrese campo");
-				String nombrecambiado = scan.next();
-				st.executeUpdate(
-    					"Update Persona SET NOMBRE = '" + nombrecambiado + "' where ID = " + ID + "");
-    			conexion.close();
-    			break;
-			case 2:
-				System.out.println("Ingrese ID a modificar");
-				ID = scan.nextInt();
-				System.out.println("Ingrese fecha de nacimiento YYYY-MM-DD");
-				String fechadenac = scan.next();
-				SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd");
-				int edad = 0;
-				try {
-					Date fechaNac = sfd.parse(fechadenac);
-					edad = calcularEdad(fechaNac);
-
-				} catch (ParseException e1) {
-
-					e1.printStackTrace();
-					}
-				st.executeUpdate(
-    					"Update Persona SET Edad = " +edad+", FECHA_NACIMIENTO = '" +fechadenac+ "' where ID = " + ID + "");
-    			conexion.close();
-				break;
-			case 3:
 			System.out.println("Ingrese ID a modificar");
-			ID = scan.nextInt();
-			System.out.println("Ingrese nuevo Nombre");
-			String nombrecambiado2 = scan.next();
-			System.out.println("Ingrese fecha de nacimiento YYYY-MM-DD");
-			fechadenac = scan.next();
-			sfd = new SimpleDateFormat("yyyy-MM-dd");
-			edad = 0;
-			try {
-				Date fechaNac = sfd.parse(fechadenac);
-				edad = calcularEdad(fechaNac);
+			int ID = scan.nextInt();
+			ResultSet rs = st.executeQuery("select * from Persona WHERE ID= " + ID + ";");
+			if (rs.next()) {
 
-			} catch (ParseException e1) {
+				switch (respuesta) {
+				case 1:
+					System.out.println("Ingrese nuevo Nombre");
+					String nombrecambiado = scan.next();
+					st.executeUpdate("Update Persona SET NOMBRE = '" + nombrecambiado + "' where ID = " + ID + "");
+					System.out.println("Modificación Realizada correctamente");
+					conexion.close();
+					break;
+				case 2:
+					System.out.println("Ingrese nueva fecha de nacimiento YYYY-MM-DD");
+					String fechadenac = scan.next();
+					SimpleDateFormat sfd = new SimpleDateFormat("yyyy-MM-dd");
+					int edad = 0;
+					try {
+						Date fechaNac = sfd.parse(fechadenac);
+						edad = calcularEdad(fechaNac);
 
-				e1.printStackTrace();
+					} catch (ParseException e1) {
+
+						e1.printStackTrace();
+					}
+					st.executeUpdate("Update Persona SET Edad = " + edad + ", FECHA_NACIMIENTO = '" + fechadenac
+							+ "' where ID = " + ID + "");
+					System.out.println("Modificación Realizada correctamente");
+					conexion.close();
+					break;
+				case 3:
+					System.out.println("Ingrese nuevo Nombre");
+					String nombrecambiado2 = scan.next();
+					System.out.println("Ingrese fecha de nacimiento YYYY-MM-DD");
+					fechadenac = scan.next();
+					sfd = new SimpleDateFormat("yyyy-MM-dd");
+					edad = 0;
+					try {
+						Date fechaNac = sfd.parse(fechadenac);
+						edad = calcularEdad(fechaNac);
+
+					} catch (ParseException e1) {
+
+						e1.printStackTrace();
+					}
+					st.executeUpdate("Update Persona SET NOMBRE = '" + nombrecambiado2 + "', Edad = " + edad
+							+ ", FECHA_NACIMIENTO = '" + fechadenac + "' where ID = " + ID + "");
+					System.out.println("Modificación Realizada correctamente");
+					conexion.close();
+					break;
+				default:
+					break;
 				}
-			st.executeUpdate(
-					"Update Persona SET NOMBRE = '" + nombrecambiado2 + "', Edad = " +edad+", FECHA_NACIMIENTO = '" +fechadenac+ "' where ID = " + ID + "");
-			conexion.close();
-			break;
-			default:
-				break;
-			}			
-			} catch (SQLException |
+			} else {
+				System.out.println("El ID no Existe");
+			}
 
-				ClassNotFoundException e) {
-			
-			e.printStackTrace();
+		} catch (SQLException |ClassNotFoundException e) {
+
+			mensajeError();
 		}
-		
+
 	}
 
 	private static void alta() {
@@ -195,8 +206,34 @@ public class AppABM {
 
 		} catch (SQLException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			mensajeError();
 		}
+	}
+
+	private static void buscar() {
+
+		try {
+			Connection conexion = AdminBD.obtenerConexion();
+			Statement st = conexion.createStatement();
+			Scanner scan = new Scanner(System.in);
+			System.out.println("Ingrese 'Nombre' a buscar");
+			String nombre = scan.next();
+			String parecido = nombre.substring(0,3);
+			ResultSet rs = st.executeQuery("select * from Persona WHERE NOMBRE LIKE '" + nombre + "%';");
+			if (rs.next()) {
+				
+			System.out.println("ID | NOMBRE |EDAD | FECHA_NACIMIENTO");
+			while (rs.next()) {
+				System.out.println(rs.getInt(1) + "  " + rs.getString(2) + "  " + rs.getInt(3) + "  " + rs.getDate(4));
+			}
+			} else {
+				System.out.println("No se encontraron resultados");
+			}
+		} catch (SQLException | ClassNotFoundException e) {
+			// TODO Auto-generated catch block
+			mensajeError();
+		}
+
 	}
 
 	private static int calcularEdad(Date fechaNac) {
@@ -220,4 +257,9 @@ public class AppABM {
 
 		return dif;
 	}
+
+	private static void mensajeError() {
+		System.out.println("No se ha podido ejecutar la consulta");
+	}
+
 }

@@ -1,3 +1,5 @@
+package tp;
+
 import java.sql.Connection;
 import java.sql.ResultSet;
 import java.sql.SQLException;
@@ -37,6 +39,10 @@ public class AppABM {
 				break;
 			case 5:
 				buscar();
+				break;
+			case 6:
+				vender();
+				break;
 			case 0:
 
 				break;
@@ -50,9 +56,43 @@ public class AppABM {
 		// INCORPORAR MODIFICACIONES EN LA BASE CON JDBC
 	}
 
+	private static void vender() {
+
+		try {
+			Scanner scan = new Scanner(System.in);
+			Connection conexion = AdminBD.obtenerConexion();
+			Statement st = conexion.createStatement();
+
+			System.out.println("Ingrese ID de la persona");
+			int iD = scan.nextInt();
+			ResultSet rs = st.executeQuery("select * from Persona WHERE ID= " + iD + ";");
+			
+			if (rs.next()) {
+				System.out.println("Nombre de la persona seleccionada: " + rs.getString(2));
+				System.out.println("Ingrese importe de la venta");
+				float importe = scan.nextFloat();
+				Date fecha = new Date();
+				SimpleDateFormat ft = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+				String fecha2 = ft.format(fecha);
+				st.executeUpdate("Insert into Ventas2(Fecha, Importe, Id_persona) values ('" + fecha2 + "'," + importe
+						+ "," + iD + ");");
+				System.out.println("Nueva Venta guardada");
+				conexion.close();
+
+			} else {
+				System.out.println("El ID no Existe, vuelva a intentarlo");
+
+			}
+		} catch (ClassNotFoundException | SQLException e) {
+			mensajeError();
+		}
+
+	}
+
 	private static int mostrarMenu() {
 		Scanner sc = new Scanner(System.in);
-		System.out.println("MENU OPCIONES: 1 -Alta | 2-Modificaci贸n | 3- Baja  | 4- Listado |5 - Buscar | 0-Salir ");
+		System.out.println(
+				"MENU OPCIONES: 1 -Alta | 2-Modificaci髇 | 3- Baja  | 4- Listado | 5 - Buscar | 6- Venta | 0-Salir ");
 		int opcion = sc.nextInt();
 		return opcion;
 	}
@@ -85,19 +125,17 @@ public class AppABM {
 			Connection conexion = AdminBD.obtenerConexion();
 			Statement st = conexion.createStatement();
 			System.out.println("Ingrese ID a borrar");
-			int ID = scan.nextInt();
-			ResultSet rs = st.executeQuery("select * from Persona WHERE ID= " + ID + ";");
+			int iD = scan.nextInt();
+			ResultSet rs = st.executeQuery("select * from Persona WHERE ID= " + iD + ";");
 			if (rs.next()) {
-				st.executeUpdate("DELETE FROM Persona WHERE ID = " + ID + ";");
-				System.out.println("Baja del " + ID + " ejecutada correctamente");
+				st.executeUpdate("DELETE FROM Persona WHERE ID = " + iD + ";");
+				System.out.println("Baja del " + iD + " ejecutada correctamente");
 				conexion.close();
 
 			} else {
 				System.out.println("El ID no Existe");
 			}
-		} catch (SQLException |
-
-				ClassNotFoundException e) {
+		} catch (SQLException | ClassNotFoundException e) {
 			// TODO Auto-generated catch block
 			mensajeError();
 		}
@@ -113,16 +151,16 @@ public class AppABM {
 			System.out.println("Elija columnas a modificar 1. Nombre, 2. Fecha_Nacimiento 3. Ambas");
 			int respuesta = scan.nextInt();
 			System.out.println("Ingrese ID a modificar");
-			int ID = scan.nextInt();
-			ResultSet rs = st.executeQuery("select * from Persona WHERE ID= " + ID + ";");
+			int iD = scan.nextInt();
+			ResultSet rs = st.executeQuery("select * from Persona WHERE ID= " + iD + ";");
 			if (rs.next()) {
 
 				switch (respuesta) {
 				case 1:
 					System.out.println("Ingrese nuevo Nombre");
 					String nombrecambiado = scan.next();
-					st.executeUpdate("Update Persona SET NOMBRE = '" + nombrecambiado + "' where ID = " + ID + "");
-					System.out.println("Modificaci贸n Realizada correctamente");
+					st.executeUpdate("Update Persona SET NOMBRE = '" + nombrecambiado + "' where ID = " + iD + "");
+					System.out.println("Modificaci髇 Realizada correctamente");
 					conexion.close();
 					break;
 				case 2:
@@ -139,8 +177,8 @@ public class AppABM {
 						e1.printStackTrace();
 					}
 					st.executeUpdate("Update Persona SET Edad = " + edad + ", FECHA_NACIMIENTO = '" + fechadenac
-							+ "' where ID = " + ID + "");
-					System.out.println("Modificaci贸n Realizada correctamente");
+							+ "' where ID = " + iD + "");
+					System.out.println("Modificaci髇 Realizada correctamente");
 					conexion.close();
 					break;
 				case 3:
@@ -159,8 +197,8 @@ public class AppABM {
 						e1.printStackTrace();
 					}
 					st.executeUpdate("Update Persona SET NOMBRE = '" + nombrecambiado2 + "', Edad = " + edad
-							+ ", FECHA_NACIMIENTO = '" + fechadenac + "' where ID = " + ID + "");
-					System.out.println("Modificaci贸n Realizada correctamente");
+							+ ", FECHA_NACIMIENTO = '" + fechadenac + "' where ID = " + iD + "");
+					System.out.println("Modificaci髇 Realizada correctamente");
 					conexion.close();
 					break;
 				default:
@@ -170,7 +208,7 @@ public class AppABM {
 				System.out.println("El ID no Existe");
 			}
 
-		} catch (SQLException |ClassNotFoundException e) {
+		} catch (SQLException | ClassNotFoundException e) {
 
 			mensajeError();
 		}
@@ -216,16 +254,18 @@ public class AppABM {
 			Connection conexion = AdminBD.obtenerConexion();
 			Statement st = conexion.createStatement();
 			Scanner scan = new Scanner(System.in);
-			System.out.println("Ingrese 'Nombre' a buscar");
+			System.out.println("Ingrese 'Nombre' a buscar (min 3 letras)");
 			String nombre = scan.next();
-			String parecido = nombre.substring(0,3);
 			ResultSet rs = st.executeQuery("select * from Persona WHERE NOMBRE LIKE '" + nombre + "%';");
 			if (rs.next()) {
-				
-			System.out.println("ID | NOMBRE |EDAD | FECHA_NACIMIENTO");
-			while (rs.next()) {
+
+				System.out.println("ID | NOMBRE |EDAD | FECHA_NACIMIENTO");
 				System.out.println(rs.getInt(1) + "  " + rs.getString(2) + "  " + rs.getInt(3) + "  " + rs.getDate(4));
-			}
+
+				while (rs.next()) {
+					System.out.println(
+							rs.getInt(1) + "  " + rs.getString(2) + "  " + rs.getInt(3) + "  " + rs.getDate(4));
+				}
 			} else {
 				System.out.println("No se encontraron resultados");
 			}
